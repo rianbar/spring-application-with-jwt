@@ -1,5 +1,6 @@
 package com.example.api.controllers;
 
+import com.example.api.configs.security.TokenService;
 import com.example.api.dtos.AuthenticationDTO;
 import com.example.api.dtos.RegisterDTO;
 import com.example.api.models.UserModel;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     @Autowired
+    TokenService tokenService;
+
+    @Autowired
     AuthenticationManager authenticationManager;
 
     @Autowired
@@ -32,7 +36,9 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(authenticationDTO.username(), authenticationDTO.password());
         var auth = this.authenticationManager.authenticate(usernamePassword);
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        var token = tokenService.generateToken((UserModel) auth.getPrincipal());
+
+        return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
     @PostMapping("/register")
